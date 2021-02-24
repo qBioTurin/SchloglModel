@@ -1,0 +1,9 @@
+#PLACE  ID
+B1	0
+X1	1
+B2	2
+#TRANSITION  ID
+c1	0
+c2	1
+c3	2
+c4	3

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- This project file has been saved by the New GreatSPN Editor, v.100 --><project name="ShlogelModel" version="121">
+  <gspn name="ExtendedPetriNet">
+    <nodes>
+      <place label-x="2.0" label-y="0.0" marking="100000" name="B1" x="4.0" y="9.0"/>
+      <place label-x="2.0" label-y="0.0" marking="250" name="X1" x="14.0" y="9.0"/>
+      <place label-x="2.0" label-y="0.0" marking="200000" name="B2" x="26.0" y="9.0"/>
+      <transition delay="FN:c1" delay-x="-1.0" delay-y="-2.0" name="c1" type="GEN" x="9.55" y="4.0"/>
+      <transition delay="FN:c2" delay-x="-2.0" delay-y="2.0" name="c2" type="GEN" x="9.55" y="15.0"/>
+      <transition delay="FN:c3" delay-x="-1.0" delay-y="-2.0" name="c3" type="GEN" x="20.55" y="4.0"/>
+      <transition delay="FN:c4" delay-x="-0.5" delay-y="2.0" name="c4" type="GEN" x="20.55" y="15.0"/>
+    </nodes>
+    <edges>
+      <arc head="c2" kind="INPUT" mult="3" tail="X1"/>
+      <arc head="X1" kind="OUTPUT" mult="2" tail="c2">
+        <point x="15.0" y="16.0"/>
+      </arc>
+      <arc head="c1" kind="INPUT" mult="2" tail="X1"/>
+      <arc head="X1" kind="OUTPUT" mult="3" tail="c1">
+        <point x="15.0" y="5.0"/>
+      </arc>
+      <arc head="c1" kind="INPUT" tail="B1"/>
+      <arc head="c4" kind="INPUT" tail="X1"/>
+      <arc head="X1" kind="OUTPUT" tail="c3"/>
+      <arc head="c3" kind="INPUT" tail="B2"/>
+      <arc head="B1" kind="OUTPUT" tail="c1">
+        <point x="5.0" y="5.0"/>
+      </arc>
+      <arc head="B2" kind="OUTPUT" tail="c3">
+        <point x="27.0" y="5.0"/>
+      </arc>
+    </edges>
+  </gspn>
+  <gspn name="PetriNet">
+    <nodes>
+      <place label-x="2.0" label-y="0.0" marking="100000" name="B1" x="4.0" y="9.0"/>
+      <place label-x="2.0" label-y="0.0" marking="250" name="X1" x="14.0" y="9.0"/>
+      <place label-x="2.0" label-y="0.0" marking="200000" name="B2" x="26.0" y="9.0"/>
+      <transition delay="0.0000003" delay-x="-1.0" delay-y="-2.0" name="c1" nservers-x="0.5" type="EXP" x="9.55" y="4.0"/>
+      <transition delay="0.0001" delay-x="-2.0" delay-y="2.0" name="c2" nservers-x="0.5" type="EXP" x="9.55" y="15.0"/>
+      <transition delay="0.001" delay-x="-1.0" delay-y="-2.0" name="c3" nservers-x="0.5" type="EXP" x="20.55" y="4.0"/>
+      <transition delay="3.5" delay-x="-0.5" delay-y="2.0" name="c4" nservers-x="0.5" type="EXP" x="20.55" y="15.0"/>
+    </nodes>
+    <edges>
+      <arc head="c2" kind="INPUT" mult="3" tail="X1"/>
+      <arc head="X1" kind="OUTPUT" mult="2" tail="c2">
+        <point x="15.0" y="16.0"/>
+      </arc>
+      <arc head="c1" kind="INPUT" mult="2" tail="X1"/>
+      <arc head="X1" kind="OUTPUT" mult="3" tail="c1">
+        <point x="15.0" y="5.0"/>
+      </arc>
+      <arc head="c1" kind="INPUT" tail="B1"/>
+      <arc head="c4" kind="INPUT" tail="X1"/>
+      <arc head="X1" kind="OUTPUT" tail="c3"/>
+      <arc head="c3" kind="INPUT" tail="B2"/>
+      <arc head="B1" kind="OUTPUT" tail="c1">
+        <point x="5.0" y="5.0"/>
+      </arc>
+      <arc head="B2" kind="OUTPUT" tail="c3">
+        <point x="27.0" y="5.0"/>
+      </arc>
+    </edges>
+  </gspn>
+</project>
