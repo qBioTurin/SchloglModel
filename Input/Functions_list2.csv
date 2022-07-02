@@ -1,0 +1,5 @@
+i; init; init_generation; min_init = 245; max_init = 250
+g; k1; runif; n=1; min = 0.028; max=0.032
+g; k2; runif; n=1; min = 0.00008; max=0.00012
+p; k3; runif; n=1; min = 2; max=500
+p; k4; runif; n=1; min = 1; max=5

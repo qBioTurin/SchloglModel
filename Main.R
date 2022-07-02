@@ -1,119 +1,193 @@
+
 library(epimod)
-library(ggplot2)
-library(readr)
 
-# model_generation(net_fname = "./Net/ShlogelModel.PNPRO")
-# 
-# model_generation(net_fname = "./Net/ShlogelModel.PNPRO",
-#                  functions_fname = "cpp/transitions.cpp")
+# downloadContainers()
 
-system(paste('mv', 
-             sprintf("ShlogelModel.*"),
-             sprintf("NetFn/")) )
+start_time <- Sys.time()
+model.generation(net_fname = "./Net/Schlogl_general.PNPRO",
+                 transitions_fname = "./Cpp/transitions.cpp")
 
+## Notice that model.generation() might take as input parameter a C++ 
+## file defining the functions characterizing the behavior of general transitions
 
-Exp.mngr=function(Gen,sim="SSA",teps=""){
-  
-  if(Gen){
-    file_to_read<-"Input/Functions_list_FNgeneral.csv"
-    solver <- "NetFn/ShlogelModel.solver"
-    folder<-paste0("GeneralShlogel",sim,teps)
-  }else{
-    #file_to_read<-"Input/Functions_list_ModelAnalysis.csv"
-    solver <- "Net/ShlogelModel.solver"
-    folder<- paste0("Shlogel",sim,teps)
-  }
-  
+end_time <- Sys.time()-start_time
 
-  if(Gen){
-    model_analysis(out_fname = "model_analysis",
-                   solver_fname = solver,
-                   parameters_fname = file_to_read,
-                   solver_type = sim,
-                   taueps = teps,
-                   n_run = 1000,
-                   f_time = 20, # weeks
-                   s_time = 1
-    )
-  }else{
-    model_analysis(out_fname = "model_analysis",
-                   solver_fname = solver,
-                   solver_type = sim,
-                   taueps = teps,
-                   n_run = 1000,
-                   f_time = 20, # weeks
-                   s_time = 1
-    )
-  }
-  
-  
-  
-  if(file.exists(folder)) { 
-    system(paste('rm -rd ', sprintf(folder)) )
-  }
-  
-  system(paste('mv', 
-               sprintf("results_model_analysis"),
-               sprintf(folder)) )
-}
+source("Rfunction/ModelAnalysisPlot.R")
 
-Exp.mngr(Gen=T,sim="SSA")
-Exp.mngr(Gen=F,sim="SSA")
+### Model Analysis
 
-Exp.mngr(Gen=T,sim="TAUG",teps=0.01)
+##############################
+## Deterministic setting
+##############################
 
+## Two scenarios:
 
+## 1) permutations are approximated
+## 2) permutations are no approximated
 
-trace=as.data.frame(read.csv( "./ShlogelSSA/model_analysis-1.trace", sep = ""))
-Gentrace=as.data.frame(read.csv( "./GeneralShlogelSSA/model_analysis-1.trace", sep = ""))
+model.generation(net_fname = "./Net/Schlogl_general.PNPRO",
+                 transitions_fname = "./Cpp/transitions.cpp")
 
-trace$type <- "No gen fun"
-Gentrace$type <- "With gen fun"
+model.analysis(solver_fname = "./Schlogl_general.solver",
+               parameters_fname = "./Input/Functions_list_ModelAnalysis.csv",
+               f_time = 100, # days
+               s_time = 1
+)
 
-TracesAll <-rbind(trace,Gentrace)
-  
-SummaryTrace<-function(trace){
-  n_sim_tot<-table(trace$Time)
-  n_sim <- n_sim_tot[1]
-  time_delete<-as.numeric(names(n_sim_tot[n_sim_tot!=n_sim_tot[1]]))
-  
-  if(length(time_delete)!=0) trace = trace[which(trace$Time!=time_delete),]
-  
-  trace$ID <- rep(1:n_sim[1],each = length(unique(trace$Time)) )
-  
-  traceNew <-  data.frame(Time = rep(trace$Time,3),
-                          Values = c( trace$B1, trace$X1, trace$B2),
-                          place= rep(c("B1","X1","B2"),each = length(trace$Time)))
-  
-  
-  Mean<-aggregate(trace[, 2:4], list(Time=trace$Time), mean)
-  sd<- aggregate(trace[, 2:4], list(Time=trace$Time), sd)
-  
-  NewTrace<-data.frame(Time = rep(Mean$Time,3),
-                       Mean = c( Mean$B1, Mean$X1, Mean$B2),
-                       place= rep(c("B1","X1","B2"),each = length(Mean$Time)),
-                       sd = c( sd$B1,sd$X1,sd$B2))
-  
-  return(list(Summary=NewTrace, trace = trace))
-}
+source("Rfunction/ModelAnalysisPlot.R")
 
-SummaryTrace(trace) -> traceNew
-SummaryTrace(Gentrace) -> GentraceNew
-traceNew$Summary$type <- traceNew$trace$type <- "No gen fun"
-GentraceNew$Summary$type <- GentraceNew$trace$type <- "With gen fun"
+AnalysisPlot = ModelAnalysisPlot(solverTraces_path = "./results_model.analysis")
 
-AlltracesSummary <- rbind(traceNew$Summary, GentraceNew$Summary)
-Alltraces <- rbind(traceNew$trace, GentraceNew$trace)
+p1 <- AnalysisPlot$list.plX1$plX1.1
 
-Alltraces$ID <- rep(1:(table(Alltraces$Time)[1]),
-                    each = length(unique(Alltraces$Time)) )
+ggarrange(p1, p2, ncol = 2, nrow = 1)
 
-ggplot(Alltraces,aes(x=Time)) +
-  geom_line(aes(y=X1, group=ID, col=type, linetype=type))+
-  facet_wrap(~type)
+# approximated case
 
+model.generation(net_fname = "./Net/Schlogl_general.PNPRO",
+                 transitions_fname = "./Cpp/transitions_apprx.cpp")
 
-ggplot(AlltracesSummary,aes(x=Time)) +
-  geom_line(aes(y=Mean, col=type, linetype=type))+
-  geom_point(aes(y=Mean, col=type, shape=type))
-  facet_wrap(~place,scales = "free_y")
+model.analysis(solver_fname = "./Schlogl_general.solver",
+               parameters_fname = "./Input/Functions_list_ModelAnalysis.csv",
+               f_time = 100, # days
+               s_time = 1
+)
+
+source("Rfunction/ModelAnalysisPlot.R")
+AnalysisPlot = ModelAnalysisPlot(solverTraces_path = "./results_model.analysis")
+p2 <- AnalysisPlot$list.plX1$plX1.1
+
+library(ggpubr)
+ggarrange(p1, p2, ncol = 2, nrow = 1)
+
+## Stochastic setting
+
+model.analysis(solver_fname = "./Schlogl_general.solver",
+               parameters_fname = "./Input/Functions_list_ModelAnalysis.csv",
+               functions_fname = "./Rfunction/Functions.R",
+               solver_type = "SSA",
+               n_run = 100,
+               parallel_processors = 2,
+               f_time = 100, # days
+               s_time = 1
+)
+
+AnalysisPlot = ModelAnalysisPlot(solverTraces_path = "./results_model.analysis",
+                                 Stoch = T)
+AnalysisPlot$list.plX1
+
+## parameters configurations
+
+model.analysis(solver_fname = "./Schlogl_general.solver",
+               parameters_fname = "./Input/Functions_list2.csv",
+               functions_fname = "./Rfunction/Functions.R",
+               solver_type = "SSA",
+               n_run = 100,
+               n_config = 8,
+               parallel_processors = 2,
+               f_time = 100, # days
+               s_time = 1
+)
+
+AnalysisPlot = ModelAnalysisPlot(solverTraces_path = "./results_model.analysis",
+                                 Stoch = T)
+
+### Sensitivity analysis
+
+##########################################################
+## Simple version where only the transition rates vary. ##
+##########################################################
+
+start_time <- Sys.time()
+sensitivity<-sensitivity_analysis(n_config = 100,
+                                  parameters_fname = "Input/Functions_list.csv", 
+                                  solver_fname = "Schlogl_general.solver",
+                                  reference_data = "Input/reference_data.csv",
+                                  distance_measure_fname = "Rfunction/msqd.R" ,
+                                  target_value_fname = "Rfunction/Target.R" ,
+                                  f_time = 100, # days
+                                  s_time = 1, # days      
+                                  parallel_processors = 2
+)
+
+end_time <- Sys.time()-start_time
+
+## Let draw the trajectories
+source("./Rfunction/SensitivityPlot.R")
+plX1
+
+## Version where only the PRCC is calculated
+# sensitivity<-sensitivity_analysis(n_config = 100,
+#                                   parameters_fname = "Input/Functions_list.csv", 
+#                                   functions_fname = "Rfunction/Functions.R",
+#                                   solver_fname = "Schlogl_general.solver",
+#                                   target_value_fname = "Rfunction/Target.R" ,
+#                                   parallel_processors = 1,
+#                                   f_time = 100 # days
+#                                   s_time = 1 # days
+#                                   )
+
+## Version where only the ranking is calculated
+# sensitivity<-sensitivity_analysis(n_config = 100,
+#                                   parameters_fname = "Input/Functions_list.csv", 
+#                                   functions_fname = "Rfunction/Functions.R",
+#                                   solver_fname = "Schlogl_general.solver",
+#                                   reference_data = "Input/reference_data.csv",
+#                                   distance_measure_fname = "Rfunction/msqd.R" ,
+#                                   parallel_processors = 1,
+#                                   f_time = 100 # days
+#                                   s_time = 1 # days
+#                                   )
+
+## Complete and more complex version where all the parameters for calculating
+## the PRCC and the ranking are considered, and the initial conditions vary too.
+
+start_time <- Sys.time()
+
+sensitivity<-sensitivity_analysis(n_config = 100,
+                                   parameters_fname = "Input/Functions_list2.csv", 
+                                   functions_fname = "Rfunction/Functions.R",
+                                   solver_fname = "Schlogl_general.solver",
+                                   reference_data = "Input/reference_data.csv",
+                                   distance_measure_fname = "Rfunction/msqd.R" ,
+                                   target_value_fname = "Rfunction/Target.R" ,
+                                   parallel_processors = 2,
+                                   f_time = 30, # days
+                                   s_time = 1 # days
+                                   )
+
+end_time <- Sys.time() - start_time
+
+source("./Rfunction/SensitivityPlot.R")
+
+plX1
+
+### Calibration analysis
+
+start_time <- Sys.time()
+
+model.calibration(parameters_fname = "Input/Functions_list_Calibration.csv",
+                  functions_fname = "Rfunction/FunctionCalibration.R",
+                  solver_fname = "Schlogl_general.solver",
+                  reference_data = "Input/reference_data.csv",
+                  distance_measure_fname = "Rfunction/msqd.R" ,
+                  f_time = 30, # days
+                  s_time = 1, # days
+                  # Vectors to control the optimization
+                  ini_v = c(247, 0.06, 0.0005),
+                  ub_v = c(249, 0.08, 0.0002),
+                  lb_v = c(248, 0.028, 0.00009),
+                  max.time = 1
+)
+
+end_time <- Sys.time()-start_time
+
+source("Rfunction/CalibrationPlot.R")
+
+plX1
+
+################################
+## from Rmd to pdf generation ##
+################################
+
+rmarkdown::render("ReadME.Rmd", "pdf_document")

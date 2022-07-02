@@ -1,4 +1,4 @@
-g; c1; 0.0000003
-g; c2; 0.0001
-g; c3; 0.001
-g; c4; 3.5
+g; k1; k1ValuesGeneration; n=1; min=0; max=1
+g; k2; k2ValuesGeneration; n=1; min = 0.1; max=1
+p; k3; runif; n=1; min = 0.1; max=1
+p; k4; runif; n=1; min = 0.1; max=1
